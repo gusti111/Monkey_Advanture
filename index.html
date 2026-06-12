@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Monkey Beach Adventure</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════════
+       SCREEN: NAME INPUT
+  ══════════════════════════════════════════ -->
+  <div id="screen-name" class="screen active">
+    <div class="glass-card name-card">
+      <div class="logo-title">🐒</div>
+      <h1 class="game-title">Monkey Beach<br/><span>Adventure</span></h1>
+      <p class="subtitle">Masukkan nama pemain</p>
+      <input
+        type="text"
+        id="input-name"
+        class="name-input"
+        maxlength="12"
+        placeholder="Nama kamu..."
+        autocomplete="off"
+      />
+      <button id="btn-start-name" class="btn-primary">MULAI PETUALANGAN</button>
+    </div>
+    <div class="beach-deco"></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SCREEN: MAIN MENU
+  ══════════════════════════════════════════ -->
+  <div id="screen-menu" class="screen">
+    <div class="menu-bg-overlay"></div>
+    <div class="menu-content">
+      <div class="menu-logo">🐒</div>
+      <h1 class="game-title-menu">Monkey Beach<br/><span>Adventure</span></h1>
+      <p id="menu-welcome" class="menu-welcome"></p>
+      <div class="menu-stats glass-card-mini">
+        <span>🏆 Best: <strong id="menu-best-score">0</strong></span>
+      </div>
+      <button id="btn-play" class="btn-primary btn-big">▶ MAIN</button>
+      <p class="menu-hint">Tekan ENTER atau tap untuk mulai</p>
+    </div>
+    <div class="wave-deco wave1"></div>
+    <div class="wave-deco wave2"></div>
+    <div class="wave-deco wave3"></div>
+    <div class="palm-deco palm-left">🌴</div>
+    <div class="palm-deco palm-right">🌴</div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SCREEN: GAME CANVAS
+  ══════════════════════════════════════════ -->
+  <div id="screen-game" class="screen">
+    <canvas id="game-canvas"></canvas>
+
+    <!-- HUD -->
+    <div id="hud">
+      <div id="hud-left">
+        <span id="hud-score">0</span>
+        <span id="hud-label">SKOR</span>
+      </div>
+      <div id="hud-center">
+        <span id="hud-multiplier" class="hidden">×1</span>
+      </div>
+      <div id="hud-right">
+        <button id="btn-audio" title="Mute Suara (M)">🔊</button>
+        <button id="btn-pause" title="Pause (ESC)">⏸</button>
+      </div>
+    </div>
+
+    <!-- Mobile Controls -->
+    <div id="mobile-controls">
+      <button id="btn-jump" class="ctrl-btn">JUMP</button>
+      <button id="btn-duck" class="ctrl-btn">DUCK</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       OVERLAY: PAUSE
+  ══════════════════════════════════════════ -->
+  <div id="overlay-pause" class="overlay hidden">
+    <div class="glass-card overlay-card">
+      <h2>⏸ PAUSE</h2>
+      <button id="btn-resume" class="btn-primary">▶ LANJUT</button>
+      <button id="btn-quit" class="btn-secondary">🏠 MENU</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SCREEN: GAME OVER
+  ══════════════════════════════════════════ -->
+  <div id="screen-gameover" class="screen">
+    <div class="gameover-bg"></div>
+    <div class="gameover-content">
+      <div class="gameover-emoji">💀</div>
+      <h2 class="gameover-title">GAME OVER</h2>
+      <div id="new-best-badge" class="new-best hidden">🎉 REKOR BARU!</div>
+      <div class="score-display glass-card-mini">
+        <div class="score-row"><span>Skor</span><strong id="go-score">0</strong></div>
+        <div class="score-row"><span>Rekor Terbaik</span><strong id="go-best">0</strong></div>
+        <div class="score-row"><span>Waktu Bertahan</span><strong id="go-time">0s</strong></div>
+        <div class="score-row"><span>Multiplier Maks</span><strong id="go-mult">×1</strong></div>
+      </div>
+      <h3 class="leaderboard-title">🏆 TOP 5 PERINGKAT</h3>
+      <div id="leaderboard" class="leaderboard glass-card-mini"></div>
+      <div class="gameover-buttons">
+        <button id="btn-restart" class="btn-primary">🔄 MAIN LAGI</button>
+        <button id="btn-menu" class="btn-secondary">🏠 MENU</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JS Modules (load order matters) -->
+  <script src="js/engine/storage.js"></script>
+  <script src="js/engine/input.js"></script>
+  <script src="js/engine/physics.js"></script>
+  <script src="js/engine/audio.js"></script>
+  <script src="js/entities/player.js"></script>
+  <script src="js/entities/obstacles.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
