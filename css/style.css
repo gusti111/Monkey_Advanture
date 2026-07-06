@@ -1217,6 +1217,21 @@ button {
   }
 }
 
+/* ── Desktop scale fix untuk GitHub Pages */
+@media (min-width: 1200px) {
+  body {
+    zoom: 0.75;
+  }
+
+  @supports not (zoom: 1) {
+    body {
+      transform: scale(0.75);
+      transform-origin: top center;
+      width: 133.333vw;
+    }
+  }
+}
+
 /* ── Custom Scrollbar ── */
 ::-webkit-scrollbar {
   width: 4px;
