@@ -4,12 +4,14 @@
   "private": true,
   "scripts": {
     "start": "node serve.js",
-    "start:port": "node serve.js"
-  }
-}
-{
-  "dependencies": {
-    "canvas": "^3.2.3",
-    "jsdom": "^29.1.1"
+    "test": "jest --runInBand"
+  },
+  "devDependencies": {
+    "jest": "^29.6.1",
+    "jsdom": "^21.0.0"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "testMatch": ["**/*.test.js"]
   }
 }
