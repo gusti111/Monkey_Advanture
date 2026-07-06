@@ -43,6 +43,20 @@ body {
   background-color: #000000;
 }
 
+/* Global scaling 75% untuk semua tampilan */
+body {
+  zoom: 0.75;
+}
+
+@supports not (zoom: 1) {
+  body {
+    transform: scale(0.75);
+    transform-origin: top left;
+    width: 133.333vw;
+    height: 133.333vh;
+  }
+}
+
 button {
   cursor: pointer;
   border: none;
