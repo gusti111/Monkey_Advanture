@@ -1,4 +1,4 @@
-  /**
+/**
  * physics.js — HD Physics Engine
  * Mario-style variable-height jump with delta-time integration
  * Tuned for 1920×1080 internal resolution, scales to any screen
@@ -49,7 +49,7 @@ const Physics = (() => {
    * @returns {boolean} whether a jump was applied
    */
   function applyJump(body) {
-    if (body.jumpsLeft <= 0) return false;
+    if (body.jumpsLeft <= 0 || body.isDucking) return false;
     const force = body.jumpsLeft === 2 ? JUMP_FORCE : DOUBLE_JUMP;
     body.vy = force;
     body.onGround = false;
@@ -59,15 +59,19 @@ const Physics = (() => {
 
   /**
    * AABB collision detection (axis-aligned bounding box)
-   * Returns true if the two rects overlap.
+   * Dilengkapi dengan Dynamic Margin agar tidak merusak hitbox objek kecil (seperti proyektil)
    */
   function checkAABB(a, b) {
-    const margin = 10; // px forgiveness margin for fairness
+    // Mencegah margin menelan objek yang ukurannya lebih kecil dari 20px (misal: Pisang/Peluru)
+    // Maksimal pemotongan adalah 10px ATAU 20% dari ukuran objek, mana saja yang lebih kecil.
+    const marginX = Math.min(10, a.w * 0.2, b.w * 0.2);
+    const marginY = Math.min(10, a.h * 0.2, b.h * 0.2);
+    
     return (
-      a.x + margin < b.x + b.w - margin &&
-      a.x + a.w - margin > b.x + margin &&
-      a.y + margin < b.y + b.h - margin &&
-      a.y + a.h - margin > b.y + margin
+      a.x + marginX < b.x + b.w - marginX &&
+      a.x + a.w - marginX > b.x + marginX &&
+      a.y + marginY < b.y + b.h - marginY &&
+      a.y + a.h - marginY > b.y + marginY
     );
   }
 
@@ -77,9 +81,12 @@ const Physics = (() => {
    */
   function checkStomp(player, obstacle) {
     if (player.vy <= 0) return false; // must be falling
+    
     const playerBottom = player.y + player.h;
     const obstacleTop  = obstacle.y;
-    const obstacleVert = obstacle.y + obstacle.h * 0.5;
+    // Area yang bisa diinjak adalah 50% bagian atas musuh
+    const obstacleVert = obstacle.y + obstacle.h * 0.5; 
+    
     return (
       playerBottom >= obstacleTop &&
       playerBottom <= obstacleVert &&

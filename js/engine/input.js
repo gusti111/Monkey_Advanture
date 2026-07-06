@@ -1,24 +1,29 @@
-  /**
+
+/**
  * input.js — Multi-Device Input Handler
  * Maps: Keyboard (SPACE/ArrowUp/ArrowDown/ESC/ENTER) + Touch buttons
  */
 
 const Input = (() => {
   const state = {
-    jump:   false,
-    duck:   false,
-    pause:  false,
-    confirm:false,
+    jump: false,
+    duck: false,
+    pause: false,
+    confirm: false,
     // edge triggers (consumed each frame)
-    jumpEdge:   false,
-    pauseEdge:  false,
-    confirmEdge:false,
+    jumpEdge: false,
+    pauseEdge: false,
+    confirmEdge: false,
   };
 
+  function init() {
+    _bindMobileControls();
+  }
+
   /* ── Keyboard ── */
-  const KEY_JUMP    = new Set(['Space', 'ArrowUp']);
-  const KEY_DUCK    = new Set(['ArrowDown']);
-  const KEY_PAUSE   = new Set(['Escape']);
+  const KEY_JUMP = new Set(['Space', 'ArrowUp']);
+  const KEY_DUCK = new Set(['ArrowDown']);
+  const KEY_PAUSE = new Set(['Escape']);
   const KEY_CONFIRM = new Set(['Enter']);
 
   document.addEventListener('keydown', e => {
@@ -44,40 +49,50 @@ const Input = (() => {
   });
 
   document.addEventListener('keyup', e => {
-    if (KEY_JUMP.has(e.code))    state.jump    = false;
-    if (KEY_DUCK.has(e.code))    state.duck    = false;
-    if (KEY_PAUSE.has(e.code))   state.pause   = false;
+    if (KEY_JUMP.has(e.code)) state.jump = false;
+    if (KEY_DUCK.has(e.code)) state.duck = false;
+    if (KEY_PAUSE.has(e.code)) state.pause = false;
     if (KEY_CONFIRM.has(e.code)) state.confirm = false;
   });
 
   /* ── Mobile Touch Buttons ── */
-  function bindTouchBtn(id, downCb, upCb) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    const down = () => downCb && downCb();
-    const up   = () => upCb   && upCb();
-    el.addEventListener('touchstart', e => { e.preventDefault(); down(); }, { passive: false });
-    el.addEventListener('touchend',   e => { e.preventDefault(); up();   }, { passive: false });
-    el.addEventListener('mousedown',  down);
-    el.addEventListener('mouseup',    up);
+  function _bindMobileControls() {
+    const controls = document.getElementById('mobile-controls');
+    if (!controls) return;
+
+    // Show controls only on devices that don't support hover (i.e., touch devices)
+    const canMatchMedia = typeof window.matchMedia === 'function';
+    if (canMatchMedia && window.matchMedia('(hover: none)').matches) {
+      controls.style.display = 'flex';
+    } else {
+      controls.style.display = 'none';
+    }
+
+    function bindTouchBtn(id, downCb, upCb) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const down = () => downCb && downCb();
+      const up = () => upCb && upCb();
+      el.addEventListener('touchstart', e => { e.preventDefault(); down(); }, { passive: false });
+      el.addEventListener('touchend', e => { e.preventDefault(); up(); }, { passive: false });
+    }
+
+    bindTouchBtn('btn-jump',
+      () => { if (!state.jump) state.jumpEdge = true; state.jump = true; },
+      () => { state.jump = false; }
+    );
+
+    bindTouchBtn('btn-duck',
+      () => { state.duck = true; },
+      () => { state.duck = false; }
+    );
   }
 
-  bindTouchBtn('btn-jump',
-    () => { if (!state.jump) state.jumpEdge = true; state.jump = true; },
-    () => { state.jump = false; }
-  );
-
-  bindTouchBtn('btn-duck',
-    () => { state.duck = true; },
-    () => { state.duck = false; }
-  );
-
   /* ── Consume edge triggers (call once per frame) ── */
-  function consumeJump()    { const v = state.jumpEdge;    state.jumpEdge    = false; return v; }
-  function consumePause()   { const v = state.pauseEdge;   state.pauseEdge   = false; return v; }
+  function consumeJump() { const v = state.jumpEdge; state.jumpEdge = false; return v; }
+  function consumePause() { const v = state.pauseEdge; state.pauseEdge = false; return v; }
   function consumeConfirm() { const v = state.confirmEdge; state.confirmEdge = false; return v; }
-
   function isDucking() { return state.duck; }
 
-  return { consumeJump, consumePause, consumeConfirm, isDucking };
+  return { init, consumeJump, consumePause, consumeConfirm, isDucking };
 })();

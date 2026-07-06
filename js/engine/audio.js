@@ -2,41 +2,42 @@
  * audio.js — AudioController
  * Web Audio API synthesizer — zero external assets required.
  * Generates all SFX procedurally: jump, stomp, collect, game-over, BGM.
+ *
+ * CATATAN INTEGRASI:
+ * Modul ini sekarang menjadi satu-satunya AudioController yang dipakai game
+ * (sebelumnya main.js punya AudioController tertanam sendiri berbasis file
+ * assets/audio/*.mp3 yang meng-shadow modul ini — sudah dihapus dari main.js).
+ * Semua fungsi di bawah disesuaikan agar cocok dengan pemanggilan di main.js:
+ * playMenuBGM/stopMenuBGM/playBeachBGM/pauseBeachBGM/stopBeachBGM,
+ * playSquish/playNormalCoin/playChestCoin, playGameOver/stopGameOver.
  */
 
 const AudioController = (() => {
   let ctx = null;       // AudioContext
   let isMuted = false;
-  let bgmNode = null;   // BGM oscillator group
-  let bgmGain = null;
 
-  // ── BGM note sequence (tropical / calypso feel) ──
-  const BGM_NOTES = [
-    523.25, 587.33, 659.25, 698.46,   // C D E F
-    783.99, 698.46, 659.25, 587.33,   // G F E D
-    523.25, 523.25, 587.33, 659.25,   // C C D E
-    587.33, 523.25,                    // D C
-  ];
-  const BGM_TEMPO = 0.22; // seconds per note
-  let bgmScheduler = null;
-  let bgmNoteIdx = 0;
-  let bgmStarted = false;
-
-  /** Lazily create AudioContext on first user interaction */
+  /** Lazily create AudioContext on first user interaction.
+   *  Dibungkus try/catch: di browser dengan autoplay policy ketat (mis. iOS
+   *  Safari versi lama) atau kalau window.AudioContext tidak tersedia sama
+   *  sekali, konstruksi bisa melempar error. Daripada bikin seluruh game
+   *  crash, kita fallback ke "silent mode" — semua fungsi SFX/BGM sudah
+   *  mengecek ctx sebelum dipakai, jadi game tetap jalan tanpa suara. */
   function _ensureCtx() {
-    if (!ctx) {
-      ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (ctx) {
+      if (ctx.state === 'suspended') {
+        try { ctx.resume(); } catch (e) {}
+      }
+      return ctx;
     }
-    if (ctx.state === 'suspended') ctx.resume();
-    return ctx;
-  }
-
-  /** Master gain node */
-  function _masterGain(vol = 0.18) {
-    const g = ctx.createGain();
-    g.gain.value = isMuted ? 0 : vol;
-    g.connect(ctx.destination);
-    return g;
+    try {
+      const Ctor = window.AudioContext || window.webkitAudioContext;
+      if (!Ctor) return null; // browser tidak dukung Web Audio API sama sekali
+      ctx = new Ctor();
+      return ctx;
+    } catch (e) {
+      console.warn('AudioController: gagal membuat AudioContext, fallback ke silent mode.', e);
+      return null;
+    }
   }
 
   // ── SFX generators ──
@@ -77,7 +78,6 @@ const AudioController = (() => {
   function playStomp() {
     if (!_ensureCtx() || isMuted) return;
     const t = ctx.currentTime;
-    // Low thump
     const osc1 = ctx.createOscillator();
     const g1   = ctx.createGain();
     osc1.connect(g1); g1.connect(ctx.destination);
@@ -88,7 +88,6 @@ const AudioController = (() => {
     g1.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
     osc1.start(t); osc1.stop(t + 0.22);
 
-    // Squish layer
     const buf  = ctx.createBuffer(1, ctx.sampleRate * 0.05, ctx.sampleRate);
     const data = buf.getChannelData(0);
     for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
@@ -98,6 +97,34 @@ const AudioController = (() => {
     src.connect(g2); g2.connect(ctx.destination);
     g2.gain.value = 0.15;
     src.start(t + 0.04);
+  }
+
+  /** Squish SFX — dipakai khusus saat pisang mengenai musuh (mis. kepiting) */
+  function playSquish() {
+    if (!_ensureCtx() || isMuted) return;
+    const t = ctx.currentTime;
+
+    // Lapisan noise pendek (tekstur "squish")
+    const buf  = ctx.createBuffer(1, ctx.sampleRate * 0.08, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
+    const src = ctx.createBufferSource();
+    const g   = ctx.createGain();
+    src.buffer = buf;
+    src.connect(g); g.connect(ctx.destination);
+    g.gain.value = 0.22;
+    src.start(t);
+
+    // Nada turun pendek biar terasa "squishy", bukan cuma noise
+    const osc = ctx.createOscillator();
+    const og  = ctx.createGain();
+    osc.connect(og); og.connect(ctx.destination);
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(260, t);
+    osc.frequency.exponentialRampToValueAtTime(90, t + 0.12);
+    og.gain.setValueAtTime(0.18, t);
+    og.gain.exponentialRampToValueAtTime(0.001, t + 0.14);
+    osc.start(t); osc.stop(t + 0.15);
   }
 
   /** Coin collect SFX — bright ding */
@@ -137,7 +164,11 @@ const AudioController = (() => {
     });
   }
 
-  /** Game Over SFX — descending sad tones */
+  // Alias supaya cocok dengan nama yang dipanggil dari main.js
+  function playNormalCoin() { playCoin(); }
+  function playChestCoin()  { playChest(); }
+
+  /** Game Over SFX — descending sad tones (one-shot, tidak perlu di-stop) */
   function playGameOver() {
     if (!_ensureCtx() || isMuted) return;
     const t = ctx.currentTime;
@@ -156,84 +187,129 @@ const AudioController = (() => {
     });
   }
 
-  /** BGM — tropical calypso loop using Web Audio API scheduler */
-  function _scheduleBGMNote(time, freq) {
-    if (!ctx || isMuted) return;
+  /** main.js memanggil stopGameOver() saat transisi layar. SFX ini bersifat
+   *  one-shot (bukan loop), jadi tidak ada node yang perlu dihentikan —
+   *  fungsi ini sengaja no-op supaya tidak error saat dipanggil. */
+  function stopGameOver() {}
 
-    // Marimba-like tone: sine + slight detune
-    const osc1 = ctx.createOscillator();
-    const osc2 = ctx.createOscillator();
-    const g    = ctx.createGain();
+  /* ════════════════════════════════════════════
+     BGM — dua channel independen (Menu & Beach)
+  ════════════════════════════════════════════ */
+  const BGM_TEMPO = 0.22; // detik per not
 
-    osc1.type = 'sine';
-    osc2.type = 'triangle';
-    osc1.frequency.value = freq;
-    osc2.frequency.value = freq * 1.003; // slight chorus
+  const MENU_NOTES = [
+    523.25, 587.33, 659.25, 698.46,
+    783.99, 698.46, 659.25, 587.33,
+    523.25, 523.25, 587.33, 659.25,
+    587.33, 523.25,
+  ];
+  // Nada & tempo sedikit berbeda supaya BGM gameplay terasa lebih "hidup"
+  const BEACH_NOTES = [
+    659.25, 698.46, 783.99, 880.00,
+    783.99, 698.46, 659.25, 587.33,
+    659.25, 783.99, 880.00, 987.77,
+    880.00, 783.99,
+  ];
 
-    const mix = ctx.createGain();
-    mix.gain.value = 0.55;
-    osc1.connect(mix); osc2.connect(mix);
+  function _createBGMChannel(notes, tempo, baseVol = 0.5) {
+    let gain = null;
+    let scheduler = null;
+    let noteIdx = 0;
+    let started = false;
 
-    mix.connect(g); g.connect(bgmGain || ctx.destination);
+    function _scheduleNote(time, freq) {
+      if (!ctx || isMuted || !gain) return;
+      const osc1 = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
+      const g    = ctx.createGain();
 
-    g.gain.setValueAtTime(0.0, time);
-    g.gain.linearRampToValueAtTime(0.22, time + 0.02);
-    g.gain.exponentialRampToValueAtTime(0.001, time + BGM_TEMPO * 0.85);
+      osc1.type = 'sine';
+      osc2.type = 'triangle';
+      osc1.frequency.value = freq;
+      osc2.frequency.value = freq * 1.003; // slight chorus
 
-    osc1.start(time); osc1.stop(time + BGM_TEMPO);
-    osc2.start(time); osc2.stop(time + BGM_TEMPO);
+      const mix = ctx.createGain();
+      mix.gain.value = 0.55;
+      osc1.connect(mix); osc2.connect(mix);
+      mix.connect(g); g.connect(gain);
 
-    // Bass note every 4 beats
-    if (bgmNoteIdx % 4 === 0) {
-      const bass = ctx.createOscillator();
-      const bg   = ctx.createGain();
-      bass.type = 'sine';
-      bass.frequency.value = freq * 0.25;
-      bass.connect(bg); bg.connect(bgmGain || ctx.destination);
-      bg.gain.setValueAtTime(0.0, time);
-      bg.gain.linearRampToValueAtTime(0.28, time + 0.04);
-      bg.gain.exponentialRampToValueAtTime(0.001, time + BGM_TEMPO * 1.8);
-      bass.start(time); bass.stop(time + BGM_TEMPO * 2);
-    }
-  }
+      g.gain.setValueAtTime(0.0, time);
+      g.gain.linearRampToValueAtTime(0.22, time + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.001, time + tempo * 0.85);
 
-  function _runBGMScheduler() {
-    if (!ctx || !bgmStarted) return;
-    const LOOKAHEAD  = 0.15; // seconds
-    const INTERVAL   = 80;   // ms
+      osc1.start(time); osc1.stop(time + tempo);
+      osc2.start(time); osc2.stop(time + tempo);
 
-    let nextNoteTime = ctx.currentTime;
-
-    bgmScheduler = setInterval(() => {
-      if (!bgmStarted || !bgmGain) return;
-      while (nextNoteTime < ctx.currentTime + LOOKAHEAD) {
-        const freq = BGM_NOTES[bgmNoteIdx % BGM_NOTES.length];
-        _scheduleBGMNote(nextNoteTime, freq);
-        bgmNoteIdx++;
-        nextNoteTime += BGM_TEMPO;
+      if (noteIdx % 4 === 0) {
+        const bass = ctx.createOscillator();
+        const bg   = ctx.createGain();
+        bass.type = 'sine';
+        bass.frequency.value = freq * 0.25;
+        bass.connect(bg); bg.connect(gain);
+        bg.gain.setValueAtTime(0.0, time);
+        bg.gain.linearRampToValueAtTime(0.28, time + 0.04);
+        bg.gain.exponentialRampToValueAtTime(0.001, time + tempo * 1.8);
+        bass.start(time); bass.stop(time + tempo * 2);
       }
-    }, INTERVAL);
-  }
-
-  function playBGM() {
-    _ensureCtx();
-    if (bgmStarted) return;
-    bgmGain = ctx.createGain();
-    bgmGain.gain.value = isMuted ? 0 : 0.6;
-    bgmGain.connect(ctx.destination);
-    bgmNoteIdx  = 0;
-    bgmStarted  = true;
-    _runBGMScheduler();
-  }
-
-  function stopBGM() {
-    bgmStarted = false;
-    if (bgmScheduler) { clearInterval(bgmScheduler); bgmScheduler = null; }
-    if (bgmGain) {
-      try { bgmGain.gain.value = 0; } catch(e) {}
-      bgmGain = null;
     }
+
+    function _runScheduler() {
+      const LOOKAHEAD = 0.15; // detik
+      const INTERVAL  = 80;   // ms
+      let nextNoteTime = ctx.currentTime;
+
+      scheduler = setInterval(() => {
+        if (!started || !gain) return;
+        while (nextNoteTime < ctx.currentTime + LOOKAHEAD) {
+          const freq = notes[noteIdx % notes.length];
+          _scheduleNote(nextNoteTime, freq);
+          noteIdx++;
+          nextNoteTime += tempo;
+        }
+      }, INTERVAL);
+    }
+
+    function play() {
+      if (!_ensureCtx() || started) return;
+      gain = ctx.createGain();
+      gain.gain.value = isMuted ? 0 : baseVol;
+      gain.connect(ctx.destination);
+      noteIdx = 0;
+      started = true;
+      _runScheduler();
+    }
+
+    function pause() {
+      started = false;
+      if (scheduler) { clearInterval(scheduler); scheduler = null; }
+      if (gain) { try { gain.gain.value = 0; } catch (e) {} }
+    }
+
+    function stop() {
+      pause();
+      gain = null;
+      noteIdx = 0;
+    }
+
+    function setMuted(m) {
+      if (gain) gain.gain.value = m ? 0 : baseVol;
+    }
+
+    return { play, pause, stop, setMuted };
   }
+
+  const menuBGM  = _createBGMChannel(MENU_NOTES, BGM_TEMPO, 0.5);
+  const beachBGM = _createBGMChannel(BEACH_NOTES, BGM_TEMPO * 0.85, 0.5);
+
+  function playMenuBGM()   { beachBGM.pause(); menuBGM.play(); }
+  function stopMenuBGM()   { menuBGM.stop(); }
+  function playBeachBGM()  { menuBGM.pause(); beachBGM.play(); }
+  function pauseBeachBGM() { beachBGM.pause(); }
+  function stopBeachBGM()  { beachBGM.stop(); }
+
+  // Alias generik (kompatibilitas ke belakang jika ada kode lain yang memanggil)
+  function playBGM()  { playBeachBGM(); }
+  function stopBGM()  { stopBeachBGM(); }
 
   // ── Mute toggle ──
   function toggleMute() {
@@ -243,29 +319,26 @@ const AudioController = (() => {
       btn.textContent = isMuted ? '🔇' : '🔊';
       btn.classList.toggle('muted', isMuted);
     }
-    if (bgmGain) bgmGain.gain.value = isMuted ? 0 : 0.6;
-    // Persist preference
-    try { localStorage.setItem('mbr_muted', isMuted ? '1' : '0'); } catch(e) {}
+    menuBGM.setMuted(isMuted);
+    beachBGM.setMuted(isMuted);
+    try { localStorage.setItem('mbr_muted', isMuted ? '1' : '0'); } catch (e) {}
   }
 
   function isMutedState() { return isMuted; }
 
   function init() {
-    // Restore mute preference
     try {
-      const saved = localStorage.getItem('mbr_muted');
+      const saved = window.localStorage ? window.localStorage.getItem('mbr_muted') : null;
       if (saved === '1') {
         isMuted = true;
         const btn = document.getElementById('btn-audio');
         if (btn) { btn.textContent = '🔇'; btn.classList.add('muted'); }
       }
-    } catch(e) {}
+    } catch (e) {}
 
-    // Bind HUD button
     const btn = document.getElementById('btn-audio');
     if (btn) btn.addEventListener('click', toggleMute);
 
-    // Keyboard shortcut M
     document.addEventListener('keydown', e => {
       if (e.key.toLowerCase() === 'm') toggleMute();
     });
@@ -274,7 +347,10 @@ const AudioController = (() => {
   return {
     init, toggleMute, isMutedState,
     playBGM, stopBGM,
+    playMenuBGM, stopMenuBGM, playBeachBGM, pauseBeachBGM, stopBeachBGM,
     playJump, playDoubleJump,
-    playStomp, playCoin, playChest, playGameOver,
+    playStomp, playSquish,
+    playCoin, playChest, playNormalCoin, playChestCoin,
+    playGameOver, stopGameOver,
   };
 })();
