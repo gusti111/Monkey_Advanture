@@ -45,12 +45,12 @@ body {
 
 /* Global scaling 75% untuk semua tampilan */
 body {
-  zoom: 0.75;
+  zoom: 1.0;
 }
 
 @supports not (zoom: 1) {
   body {
-    transform: scale(0.75);
+    transform: scale(1.0);
     transform-origin: top left;
     width: 133.333vw;
     height: 133.333vh;
