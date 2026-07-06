@@ -1,8 +1,8 @@
 # Laporan Praktikum — Monkey Adventure (Bekantan Beach Run)
 
 ## Identitas
-- Nama: [Nama Anda]
-- NIM: [NIM]
+- Nama: Gusty  Faqikh
+- NIM: 3202416134
 - Praktikum: Pengembangan Game Web
 
 ## Tujuan
