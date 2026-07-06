@@ -1217,17 +1217,26 @@ button {
   }
 }
 
-/* ── Desktop scale fix untuk GitHub Pages */
+/* ── Desktop menu scaling fix */
 @media (min-width: 1200px) {
-  body {
+  #screen-menu {
+    padding: clamp(20px, 3vw, 26px);
+  }
+
+  .menu-content {
+    width: min(100%, 420px);
+    max-width: 420px;
     zoom: 0.75;
+    transform: scale(0.75);
+    transform-origin: top center;
   }
 
   @supports not (zoom: 1) {
-    body {
+    .menu-content {
+      zoom: normal;
       transform: scale(0.75);
       transform-origin: top center;
-      width: 133.333vw;
+      width: 560px;
     }
   }
 }
