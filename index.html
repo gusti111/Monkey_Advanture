@@ -1,159 +1,161 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#000000" />
-  
+
   <link rel="icon" href="data:,">
-  
+
   <title>Bekantan Beach Run</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
+
 <body>
 
-  <div id="screen-name" class="screen active">
-    <div class="glass-card name-card">
-      <div class="logo-title">🐒</div>
-      <h1 class="game-title">Bekantan<br/><span>Mangrove Adventure</span></h1>
-      <p class="subtitle">Enter player name</p>
-      <input
-        type="text"
-        id="input-name"
-        class="name-input"
-        maxlength="12"
-        placeholder="Nama kamu..."
-        autocomplete="off"
-      />
-      <button id="btn-start-name" class="btn-primary">START THE ADVENTURE</button>
+  <div id="app-rotate">
+    <div id="screen-name" class="screen active">
+      <div class="glass-card name-card">
+        <div class="logo-title">🐒</div>
+        <h1 class="game-title">Bekantan<br /><span>Mangrove Adventure</span></h1>
+        <p class="subtitle">Enter player name</p>
+        <input type="text" id="input-name" class="name-input" maxlength="12" placeholder="Nama kamu..."
+          autocomplete="off" />
+        <button id="btn-start-name" class="btn-primary">START THE ADVENTURE</button>
+      </div>
+      <div class="beach-deco"></div>
     </div>
-    <div class="beach-deco"></div>
-  </div>
 
-  <div id="screen-story" class="screen">
-    <div class="glass-card story-card">
-      <div class="story-emoji">🌿🐒🌊</div>
-      <h2 class="story-title">Sebelum Petualangan Dimulai...</h2>
-      <p class="story-text">
-        Habitat Bekantan rusak akibat penebangan liar.
-        Banu, seekor Bekantan muda, harus berpetualang melintasi
-        pantai dan hutan mangrove untuk mengumpulkan makanan,
-        menyelamatkan satwa lain, serta menghadapi berbagai
-        ancaman yang mengintai di setiap wilayah.
-      </p>
-      <button id="btn-story-continue" class="btn-primary">MULAI PETUALANGAN</button>
-    </div>
-  </div>
-
-  <div id="screen-menu" class="screen">
-    <div class="menu-bg-overlay"></div>
-    <div class="menu-content">
-      <canvas id="menu-mascot" width="160" height="210"></canvas>
-      <h1 class="game-title-menu">Bekantan Beach Run<br /><span>Petualangan Mangrove</span></h1>
-      <p id="menu-welcome" class="menu-welcome"></p>
-      <div class="menu-stats glass-card-mini">
-        <span>🏆 Best: <strong id="menu-best-score">0</strong></span>
-        <span class="menu-stats-divider">•</span>
-        <span>🪙 <strong id="menu-coin-count">0</strong></span>
-      </div>
-      <div class="menu-actions">
-        <button id="btn-play" class="btn-primary btn-big">▶ MAIN</button>
-        <button id="btn-shop" class="btn-secondary btn-shop-menu">🛒 TOKO</button>
-      </div>
-      <p class="menu-hint">Tekan ENTER atau ketuk untuk mulai</p>
-      <div class="menu-controls-hint">
-        <span>⬆️ / SPACE — Lompat (ganda)</span>
-        <span>⬇️ — Duck</span>
-        <span>🍌 X — Lempar Pisang</span>
-      </div>
-      <p class="menu-hint">Tekan ENTER atau ketuk untuk mulai</p>
-    </div>
-    <div class="menu-sun">☀️</div>
-    <div class="menu-cloud cloud1">☁️</div>
-    <div class="menu-cloud cloud2">☁️</div>
-    <div class="menu-bird bird1">🦅</div>
-    <div class="menu-bird bird2">🦅</div>
-    <div class="wave-deco wave1"></div>
-    <div class="wave-deco wave2"></div>
-    <div class="wave-deco wave3"></div>
-    <div class="palm-deco palm-left">🌴</div>
-    <div class="palm-deco palm-right">🌴</div>
-  </div>
-
-  <div id="screen-shop" class="screen">
-    <div class="shop-bg"></div>
-    <div class="shop-content">
-      <h2 class="shop-title">🛒 TOKO BEKANTAN</h2>
-      <div class="shop-balance glass-card-mini">🪙 <strong id="shop-coin-balance">0</strong> koin</div>
-      <div id="shop-list" class="shop-list"></div>
-      <p class="shop-hint">Kumpulkan koin (🪙) dan peti (📦) saat main untuk belanja di sini</p>
-      <button id="btn-shop-back" class="btn-secondary">🏠 KEMBALI KE MENU</button>
-    </div>
-  </div>
-
-  <div id="screen-game" class="screen">
-    <canvas id="game-canvas"></canvas>
-
-    <div id="hud">
-      <div id="hud-left">
-        <span id="hud-score">0</span>
-        <span id="hud-label">SKOR</span>
-        <div id="hud-banana"><span id="hud-banana-icon">🍌</span> <span id="hud-banana-count">5</span></div>
-        <div id="hud-coin"><span id="hud-coin-icon">🪙</span> <span id="hud-coin-count">0</span></div>
-        <div id="hud-shield" class="hidden"><span id="hud-shield-icon">🛡️</span> <span id="hud-shield-count">0</span></div>
-      </div>
-      <div id="hud-center">
-        <span id="hud-multiplier" class="hidden">×1</span>
-      </div>
-      <div id="hud-right">
-        <button id="btn-audio" title="Mute Suara (M)">🔊</button>
-        <button id="btn-pause" title="Pause (ESC)">⏸</button>
+    <div id="screen-story" class="screen">
+      <div class="glass-card story-card">
+        <div class="story-emoji">🌿🐒🌊</div>
+        <h2 class="story-title">Sebelum Petualangan Dimulai...</h2>
+        <p class="story-text">
+          Habitat Bekantan rusak akibat penebangan liar.
+          Banu, seekor Bekantan muda, harus berpetualang melintasi
+          pantai dan hutan mangrove untuk mengumpulkan makanan,
+          menyelamatkan satwa lain, serta menghadapi berbagai
+          ancaman yang mengintai di setiap wilayah.
+        </p>
+        <button id="btn-story-continue" class="btn-primary">MULAI PETUALANGAN</button>
       </div>
     </div>
 
-    <div id="mobile-controls">
-      <button id="btn-jump" class="ctrl-btn">JUMP</button>
-      <button id="btn-duck" class="ctrl-btn">DUCK</button>
-    </div>
-
-    <div id="toast-hint" class="toast-hint hidden"></div>
-  </div>
-
-  <div id="overlay-pause" class="overlay hidden">
-    <div class="glass-card overlay-card">
-      <h2>⏸ PAUSE</h2>
-      <button id="btn-resume" class="btn-primary">▶ LANJUT</button>
-      <button id="btn-quit" class="btn-secondary">🏠 MENU</button>
-    </div>
-  </div>
-
-  <div id="screen-gameover" class="screen">
-    <div class="gameover-bg"></div>
-    <div class="gameover-content">
-      <div class="gameover-emoji">💀</div>
-      <h2 class="gameover-title">GAME OVER</h2>
-      <div id="new-best-badge" class="new-best hidden">🎉 REKOR BARU!</div>
-      <div class="score-display glass-card-mini">
-        <div class="score-row"><span>Skor</span><strong id="go-score">0</strong></div>
-        <div class="score-row"><span>Rekor Terbaik</span><strong id="go-best">0</strong></div>
-        <div class="score-row"><span>Waktu Bertahan</span><strong id="go-time">0s</strong></div>
-        <div class="score-row"><span>Kecepatan Maksimal yang dicapai</span><strong id="go-mult">×1</strong></div>
-        <div class="score-row"><span>Koin Didapat</span><strong id="go-coins">+0 🪙</strong></div>
+    <div id="screen-menu" class="screen">
+      <div class="menu-bg-overlay"></div>
+      <div class="menu-content">
+        <canvas id="menu-mascot" width="160" height="210"></canvas>
+        <h1 class="game-title-menu">Bekantan Beach Run<br /><span>Petualangan Mangrove</span></h1>
+        <p id="menu-welcome" class="menu-welcome"></p>
+        <div class="menu-stats glass-card-mini">
+          <span>🏆 Best: <strong id="menu-best-score">0</strong></span>
+          <span class="menu-stats-divider">•</span>
+          <span>🪙 <strong id="menu-coin-count">0</strong></span>
+        </div>
+        <div class="menu-actions">
+          <button id="btn-play" class="btn-primary btn-big">▶ MAIN</button>
+          <button id="btn-shop" class="btn-secondary btn-shop-menu">🛒 TOKO</button>
+        </div>
+        <p class="menu-hint">Tekan ENTER atau ketuk untuk mulai</p>
+        <div class="menu-controls-hint">
+          <span>⬆️ / SPACE — Lompat (ganda)</span>
+          <span>⬇️ — Duck</span>
+          <span>🍌 X — Lempar Pisang</span>
+        </div>
+        <p class="menu-hint">Tekan ENTER atau ketuk untuk mulai</p>
       </div>
-      <h3 class="leaderboard-title">🏆 TOP 5 PERINGKAT</h3>
-      <div id="leaderboard" class="leaderboard glass-card-mini"></div>
-      <div class="gameover-buttons">
-        <button id="btn-restart" class="btn-primary">🔄 MAIN LAGI</button>
-        <button id="btn-menu" class="btn-secondary">🏠 MENU</button>
-        <button id="btn-gameover-shop" class="btn-secondary">🛒 TOKO</button>
+      <div class="menu-sun">☀️</div>
+      <div class="menu-cloud cloud1">☁️</div>
+      <div class="menu-cloud cloud2">☁️</div>
+      <div class="menu-bird bird1">🦅</div>
+      <div class="menu-bird bird2">🦅</div>
+      <div class="wave-deco wave1"></div>
+      <div class="wave-deco wave2"></div>
+      <div class="wave-deco wave3"></div>
+      <div class="palm-deco palm-left">🌴</div>
+      <div class="palm-deco palm-right">🌴</div>
+    </div>
+
+    <div id="screen-shop" class="screen">
+      <div class="shop-bg"></div>
+      <div class="shop-content">
+        <h2 class="shop-title">🛒 TOKO BEKANTAN</h2>
+        <div class="shop-balance glass-card-mini">🪙 <strong id="shop-coin-balance">0</strong> koin</div>
+        <div id="shop-list" class="shop-list"></div>
+        <p class="shop-hint">Kumpulkan koin (🪙) dan peti (📦) saat main untuk belanja di sini</p>
+        <button id="btn-shop-back" class="btn-secondary">🏠 KEMBALI KE MENU</button>
       </div>
     </div>
-  </div>
+
+    <div id="screen-game" class="screen">
+      <canvas id="game-canvas"></canvas>
+
+      <div id="hud">
+        <div id="hud-left">
+          <span id="hud-score">0</span>
+          <span id="hud-label">SKOR</span>
+          <div id="hud-banana"><span id="hud-banana-icon">🍌</span> <span id="hud-banana-count">5</span></div>
+          <div id="hud-coin"><span id="hud-coin-icon">🪙</span> <span id="hud-coin-count">0</span></div>
+          <div id="hud-shield" class="hidden"><span id="hud-shield-icon">🛡️</span> <span id="hud-shield-count">0</span>
+          </div>
+        </div>
+        <div id="hud-center">
+          <span id="hud-multiplier" class="hidden">×1</span>
+        </div>
+        <div id="hud-right">
+          <button id="btn-audio" title="Mute Suara (M)">🔊</button>
+          <button id="btn-pause" title="Pause (ESC)">⏸</button>
+        </div>
+      </div>
+
+      <div id="mobile-controls">
+        <button id="btn-jump" class="ctrl-btn">JUMP</button>
+        <button id="btn-duck" class="ctrl-btn">DUCK</button>
+      </div>
+
+      <div id="toast-hint" class="toast-hint hidden"></div>
+    </div>
+
+    <div id="overlay-pause" class="overlay hidden">
+      <div class="glass-card overlay-card">
+        <h2>⏸ PAUSE</h2>
+        <button id="btn-resume" class="btn-primary">▶ LANJUT</button>
+        <button id="btn-quit" class="btn-secondary">🏠 MENU</button>
+      </div>
+    </div>
+
+    <div id="screen-gameover" class="screen">
+      <div class="gameover-bg"></div>
+      <div class="gameover-content">
+        <div class="gameover-emoji">💀</div>
+        <h2 class="gameover-title">GAME OVER</h2>
+        <div id="new-best-badge" class="new-best hidden">🎉 REKOR BARU!</div>
+        <div class="score-display glass-card-mini">
+          <div class="score-row"><span>Skor</span><strong id="go-score">0</strong></div>
+          <div class="score-row"><span>Rekor Terbaik</span><strong id="go-best">0</strong></div>
+          <div class="score-row"><span>Waktu Bertahan</span><strong id="go-time">0s</strong></div>
+          <div class="score-row"><span>Kecepatan Maksimal yang dicapai</span><strong id="go-mult">×1</strong></div>
+          <div class="score-row"><span>Koin Didapat</span><strong id="go-coins">+0 🪙</strong></div>
+        </div>
+        <h3 class="leaderboard-title">🏆 TOP 5 PERINGKAT</h3>
+        <div id="leaderboard" class="leaderboard glass-card-mini"></div>
+        <div class="gameover-buttons">
+          <button id="btn-restart" class="btn-primary">🔄 MAIN LAGI</button>
+          <button id="btn-menu" class="btn-secondary">🏠 MENU</button>
+          <button id="btn-gameover-shop" class="btn-secondary">🛒 TOKO</button>
+        </div>
+      </div>
+    </div>
+
+
+  </div><!-- /#app-rotate -->
 
   <!-- Core Configuration & Engines -->
   <script src="js/config.js"></script>
@@ -179,4 +181,5 @@
   <script src="js/gameManager.js"></script>
   <script src="js/main.js"></script>
 </body>
+
 </html>

@@ -11,10 +11,17 @@
      CANVAS & CONTEXT
   ════════════════════════════════════════════ */
   const canvas = document.getElementById('game-canvas');
+  // #app-rotate is the force-landscape wrapper (see style.css). On portrait
+  // phones it's rotated 90° via CSS and its *layout* box (clientWidth/Height,
+  // which CSS transforms do NOT affect) already reports the correct
+  // logical landscape-shaped space — so we measure it instead of
+  // window.innerWidth/innerHeight, which would still report the raw
+  // (unrotated) physical viewport and produce a tiny letterboxed canvas.
+  const appRoot = document.getElementById('app-rotate') || document.body;
 
   function resizeCanvas() {
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
+    const vw = appRoot.clientWidth;
+    const vh = appRoot.clientHeight;
     const aspect = Config.W_INT / Config.H_INT;
     let cw, ch; // Declare cw and ch
     if (vw / vh > aspect) { ch = vh; cw = ch * aspect; }
@@ -27,8 +34,53 @@
     canvas.style.top = ((vh - ch) / 2) + 'px';
     canvas.style.position = 'absolute';
   }
+
   window.addEventListener('resize', resizeCanvas);
+  // orientationchange fires when the device is physically rotated; some
+  // mobile browsers report stale innerWidth/Height for a brief moment right
+  // after it fires, so we re-measure on the next frame as well.
+  window.addEventListener('orientationchange', () => {
+    resizeCanvas();
+    requestAnimationFrame(resizeCanvas);
+    setTimeout(resizeCanvas, 250);
+  });
   resizeCanvas();
+
+  /* ════════════════════════════════════════════
+     FULLSCREEN + REAL ORIENTATION LOCK
+     Progressive enhancement on top of the CSS force-landscape trick:
+     browsers that support the Fullscreen API + Screen Orientation API
+     (mostly Android Chrome) get a proper native fullscreen landscape lock.
+     Browsers that don't (notably iOS Safari) simply keep relying on the
+     CSS rotation above — nothing breaks either way since every call here
+     is wrapped in try/catch and only attempted, never required.
+  ════════════════════════════════════════════ */
+  async function requestFullscreenAndLockLandscape() {
+    try {
+      const el = document.documentElement;
+      if (!document.fullscreenElement && el.requestFullscreen) {
+        await el.requestFullscreen({ navigationUI: 'hide' }).catch(() => { });
+      }
+    } catch (e) { /* fullscreen refused/unsupported — ignore */ }
+    try {
+      if (screen.orientation && screen.orientation.lock) {
+        await screen.orientation.lock('landscape').catch(() => { });
+      }
+    } catch (e) { /* orientation lock unsupported (e.g. iOS Safari) — ignore */ }
+  }
+
+  // Fullscreen/orientation APIs only work inside a user gesture, so we hook
+  // this to the very first tap/click anywhere and only run it once.
+  function armFullscreenOnFirstGesture() {
+    const handler = () => {
+      requestFullscreenAndLockLandscape();
+      document.removeEventListener('click', handler);
+      document.removeEventListener('touchend', handler);
+    };
+    document.addEventListener('click', handler, { once: true });
+    document.addEventListener('touchend', handler, { once: true });
+  }
+  armFullscreenOnFirstGesture();
 
   // Initialize the game
   GameManager.init();

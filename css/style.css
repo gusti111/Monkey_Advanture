@@ -57,6 +57,41 @@ body {
   }
 }
 
+/* ═══════════════════════════════════════════════
+   FORCE-LANDSCAPE WRAPPER
+   Game ini didesain landscape (16:9). Di HP yang dipegang
+   portrait, alih-alih membiarkan konten landscape mengecil
+   (letterboxed) di dalam viewport portrait yang sempit, kita
+   putar seluruh wrapper 90° dan reposisi ulang agar tetap
+   memenuhi layar penuh — persis seperti game HTML5 landscape
+   lain (tidak perlu user memutar HP secara manual).
+
+   Karena #app-rotate diberi `transform`, elemen ini otomatis
+   jadi containing block untuk semua descendant yang
+   position:fixed/absolute (termasuk .screen yang pakai
+   position:fixed;inset:0) — jadi seluruh isi game ikut
+   ter-resize & ter-posisi ulang otomatis tanpa perlu sentuh
+   CSS masing-masing screen.
+═══════════════════════════════════════════════ */
+#app-rotate {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+@media screen and (orientation: portrait) and (max-width: 1024px) {
+  #app-rotate {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vh;
+    height: 100vw;
+    transform-origin: top left;
+    transform: rotate(90deg) translateY(-100%);
+  }
+}
+
 button {
   cursor: pointer;
   border: none;
@@ -1272,7 +1307,7 @@ button {
   position: fixed;
   top: env(safe-area-inset-top, 8px);
   right: env(safe-area-inset-right, 8px);
-  background: rgba(0,0,0,0.55);
+  background: rgba(0, 0, 0, 0.55);
   color: #fff;
   font-size: 12px;
   padding: 8px 10px;
@@ -1284,4 +1319,6 @@ button {
   min-width: 120px;
 }
 
-#debug-overlay .key { opacity: 0.6; }
+#debug-overlay .key {
+  opacity: 0.6;
+}
