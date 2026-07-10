@@ -108,8 +108,22 @@ button {
   width: 100%;
   height: 100%;
   height: -webkit-fill-available;
+  /* BUGFIX: centering with align-items/justify-content clips content
+     that's taller than the viewport (short landscape phones), with no
+     way to scroll to the clipped part. overflow-y:auto here plus
+     margin:auto on the inner wrapper (.screen-content-safe) lets
+     content center when it fits and fall back to normal scrollable
+     flow when it doesn't. */
+  overflow-y: auto;
   /* RESPONSIVE FIX: Memastikan jarak aman otomatis pada device layar berponi (Notch) */
   padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+}
+
+/* Direct content wrapper of each screen (name-card, story-card,
+   menu-content, shop-content, gameover-content) uses margin:auto
+   centering instead of relying only on the parent flex centering. */
+.screen-content-safe {
+  margin: auto;
 }
 
 .screen.active {
@@ -1003,6 +1017,22 @@ button {
   background: rgba(255, 255, 255, 0.40);
   transform: scale(0.94);
 }
+
+/* Throw (banana) button — visually distinct from jump/duck so it doesn't
+   get mistaken for a movement control; sits between them via flex order. */
+.ctrl-btn-throw {
+  order: 1;
+  background: rgba(255, 224, 102, 0.28);
+  border-color: rgba(255, 224, 102, 0.55);
+  font-size: 1.6rem;
+}
+
+.ctrl-btn-throw:active {
+  background: rgba(255, 224, 102, 0.5);
+}
+
+#btn-jump { order: 0; }
+#btn-duck { order: 2; }
 
 /* ════════════════════════════════
    PAUSE OVERLAY

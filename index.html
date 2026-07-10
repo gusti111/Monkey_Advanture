@@ -22,7 +22,7 @@
 
   <div id="app-rotate">
     <div id="screen-name" class="screen active">
-      <div class="glass-card name-card">
+      <div class="glass-card name-card screen-content-safe">
         <div class="logo-title">🐒</div>
         <h1 class="game-title">Bekantan<br /><span>Mangrove Adventure</span></h1>
         <p class="subtitle">Enter player name</p>
@@ -34,7 +34,7 @@
     </div>
 
     <div id="screen-story" class="screen">
-      <div class="glass-card story-card">
+      <div class="glass-card story-card screen-content-safe">
         <div class="story-emoji">🌿🐒🌊</div>
         <h2 class="story-title">Sebelum Petualangan Dimulai...</h2>
         <p class="story-text">
@@ -50,7 +50,7 @@
 
     <div id="screen-menu" class="screen">
       <div class="menu-bg-overlay"></div>
-      <div class="menu-content">
+      <div class="menu-content screen-content-safe">
         <canvas id="menu-mascot" width="160" height="210"></canvas>
         <h1 class="game-title-menu">Bekantan Beach Run<br /><span>Petualangan Mangrove</span></h1>
         <p id="menu-welcome" class="menu-welcome"></p>
@@ -69,7 +69,6 @@
           <span>⬇️ — Duck</span>
           <span>🍌 X — Lempar Pisang</span>
         </div>
-        <p class="menu-hint">Tekan ENTER atau ketuk untuk mulai</p>
       </div>
       <div class="menu-sun">☀️</div>
       <div class="menu-cloud cloud1">☁️</div>
@@ -85,7 +84,7 @@
 
     <div id="screen-shop" class="screen">
       <div class="shop-bg"></div>
-      <div class="shop-content">
+      <div class="shop-content screen-content-safe">
         <h2 class="shop-title">🛒 TOKO BEKANTAN</h2>
         <div class="shop-balance glass-card-mini">🪙 <strong id="shop-coin-balance">0</strong> koin</div>
         <div id="shop-list" class="shop-list"></div>
@@ -118,6 +117,7 @@
       <div id="mobile-controls">
         <button id="btn-jump" class="ctrl-btn">JUMP</button>
         <button id="btn-duck" class="ctrl-btn">DUCK</button>
+        <button id="btn-throw" class="ctrl-btn ctrl-btn-throw">🍌</button>
       </div>
 
       <div id="toast-hint" class="toast-hint hidden"></div>
@@ -133,7 +133,7 @@
 
     <div id="screen-gameover" class="screen">
       <div class="gameover-bg"></div>
-      <div class="gameover-content">
+      <div class="gameover-content screen-content-safe">
         <div class="gameover-emoji">💀</div>
         <h2 class="gameover-title">GAME OVER</h2>
         <div id="new-best-badge" class="new-best hidden">🎉 REKOR BARU!</div>

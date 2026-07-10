@@ -1,4 +1,3 @@
-
 /**
  * gameManager.js — Core Game State & Loop Orchestrator
  *
@@ -107,6 +106,18 @@ const GameManager = (() => {
       }
     });
     // Mobile controls are bound in UIManager or main.js if they remain there
+
+    // Mobile throw button (jump/duck are bound in js/engine/input.js;
+    // throw lives here since handleThrow's guards — state, cooldown, ammo —
+    // are private to this module). touchstart is used instead of click for
+    // lower input latency on mobile, matching how jump/duck respond instantly
+    // to touch elsewhere in the game; preventDefault stops the synthetic
+    // click that would otherwise also fire and double-trigger the throw.
+    const btnThrow = document.getElementById('btn-throw');
+    if (btnThrow) {
+      btnThrow.addEventListener('touchstart', e => { e.preventDefault(); handleThrow(); }, { passive: false });
+      btnThrow.addEventListener('click', handleThrow);
+    }
 
     // Start the game by checking for a username
     const savedUser = Storage.getUsername();
