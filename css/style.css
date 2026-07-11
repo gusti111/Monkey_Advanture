@@ -35,9 +35,14 @@
 html,
 body {
   width: 100%;
-  /* RESPONSIVE FIX: Menggunakan tinggi dinamis mencegah bar navigasi browser memotong UI */
+  /* RESPONSIVE FIX: Menggunakan tinggi dinamis mencegah bar navigasi browser memotong UI.
+     `--vh` di-set lewat JS di main.js dari window.innerHeight (bukan CSS `dvh`,
+     yang perilakunya tidak konsisten di beberapa browser mobile — pernah
+     dicoba dan malah memotong konten). Fallback vh/-webkit-fill-available
+     tetap ada untuk browser yang JS-nya belum sempat jalan. */
   height: 100vh;
   height: -webkit-fill-available;
+  height: calc(var(--vh, 1vh) * 100);
   overflow: hidden;
   font-family: 'Poppins', sans-serif;
   background-color: #000000;
@@ -80,13 +85,21 @@ body {
   height: 100%;
 }
 
-@media screen and (orientation: portrait) and (max-width: 1024px) {
+@media screen and (orientation: portrait) and (max-width: 1024px) and (hover: none) {
+  /* `hover: none` memastikan rotasi paksa ini HANYA aktif di layar
+     sentuh (HP/tablet), bukan laptop dengan jendela browser yang
+     sempit/memanjang. Dipilih `hover: none` (bukan `pointer: coarse`)
+     karena input.js sudah lebih dulu pakai matchMedia('(hover: none)')
+     untuk menampilkan tombol mobile-controls, dan itu terbukti match
+     dengan benar di device ini — jadi kita samakan supaya CSS & JS
+     mendeteksi "ini device sentuh" dengan cara yang identik. */
   #app-rotate {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vh;
     height: 100vw;
+    width: calc(var(--vh, 1vh) * 100);
     transform-origin: top left;
     transform: rotate(90deg) translateY(-100%);
   }
@@ -108,6 +121,7 @@ button {
   width: 100%;
   height: 100%;
   height: -webkit-fill-available;
+  height: calc(var(--vh, 1vh) * 100);
   /* BUGFIX: centering with align-items/justify-content clips content
      that's taller than the viewport (short landscape phones), with no
      way to scroll to the clipped part. overflow-y:auto here plus

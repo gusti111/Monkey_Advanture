@@ -8,6 +8,24 @@
 
 (() => {
   /* ════════════════════════════════════════════
+     REAL VIEWPORT HEIGHT (--vh custom property)
+     Mobile browsers' `100vh` includes the address bar even when it's
+     currently hidden, which made #app-rotate/.screen taller than what's
+     actually visible and let the page scroll, exposing decorations that
+     should sit flush at the screen edge. The CSS `dvh` unit was tried as
+     a fix but some mobile browsers compute it inconsistently (too small,
+     cutting off content). Measuring window.innerHeight in JS and writing
+     it to a CSS variable is the more reliable, well-tested approach —
+     style.css uses `calc(var(--vh, 1vh) * 100)` wherever it previously
+     used 100vh.
+  ════════════════════════════════════════════ */
+  function setViewportHeightVar() {
+    document.documentElement.style.setProperty('--vh', (window.innerHeight * 0.01) + 'px');
+  }
+  setViewportHeightVar();
+  window.addEventListener('resize', setViewportHeightVar);
+
+  /* ════════════════════════════════════════════
      CANVAS & CONTEXT
   ════════════════════════════════════════════ */
   const canvas = document.getElementById('game-canvas');
@@ -40,9 +58,10 @@
   // mobile browsers report stale innerWidth/Height for a brief moment right
   // after it fires, so we re-measure on the next frame as well.
   window.addEventListener('orientationchange', () => {
+    setViewportHeightVar();
     resizeCanvas();
-    requestAnimationFrame(resizeCanvas);
-    setTimeout(resizeCanvas, 250);
+    requestAnimationFrame(() => { setViewportHeightVar(); resizeCanvas(); });
+    setTimeout(() => { setViewportHeightVar(); resizeCanvas(); }, 250);
   });
   resizeCanvas();
 
