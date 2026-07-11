@@ -17,5 +17,9 @@ const Config = {
   SPEED_SCALE: 110,
   SCORE_TIME_M: 0.035,
 
+  // Set true saat development untuk menampilkan debug overlay (pool sizes, dll).
+  // WAJIB false saat build/deploy ke pemain — jangan bocorkan info internal ini.
+  DEBUG: false,
+
   // Other constants can be moved here as well
 };

@@ -304,14 +304,18 @@ const GameManager = (() => {
     
     updateHUD();
 
-    // Update debug overlay once per frame with pool sizes
-    try {
-      const projPool = (typeof Projectile !== 'undefined' && Projectile._pool) ? Projectile._pool.length : 0;
-      const upPool = (typeof PowerUp !== 'undefined' && PowerUp._pool) ? PowerUp._pool.length : 0;
-      const obsActive = (typeof Obstacles !== 'undefined' && Obstacles.getPool) ? Obstacles.getPool().length : 0;
-      const bossProj = (typeof Boss !== 'undefined' && Boss.getBoss && Boss.getBoss()) ? Boss.getBoss().projectiles.length : 0;
-      UIManager.updateDebug({ projectilePool: projPool, powerupPool: upPool, obstaclesActive: obsActive, bossProjectiles: bossProj });
-    } catch (e) { /* ignore debug errors */ }
+    // Update debug overlay once per frame with pool sizes.
+    // Hanya aktif kalau Config.DEBUG = true — mencegah info internal (pool
+    // sizes) bocor ke tampilan pemain biasa saat build production.
+    if (Config.DEBUG) {
+      try {
+        const projPool = (typeof Projectile !== 'undefined' && Projectile._pool) ? Projectile._pool.length : 0;
+        const upPool = (typeof PowerUp !== 'undefined' && PowerUp._pool) ? PowerUp._pool.length : 0;
+        const obsActive = (typeof Obstacles !== 'undefined' && Obstacles.getPool) ? Obstacles.getPool().length : 0;
+        const bossProj = (typeof Boss !== 'undefined' && Boss.getBoss && Boss.getBoss()) ? Boss.getBoss().projectiles.length : 0;
+        UIManager.updateDebug({ projectilePool: projPool, powerupPool: upPool, obstaclesActive: obsActive, bossProjectiles: bossProj });
+      } catch (e) { /* ignore debug errors */ }
+    }
   }
 
   function handleThrow() {
