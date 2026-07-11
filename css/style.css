@@ -35,31 +35,19 @@
 html,
 body {
   width: 100%;
-  /* RESPONSIVE FIX: Menggunakan tinggi dinamis mencegah bar navigasi browser memotong UI.
-     `--vh` di-set lewat JS di main.js dari window.innerHeight (bukan CSS `dvh`,
-     yang perilakunya tidak konsisten di beberapa browser mobile — pernah
-     dicoba dan malah memotong konten). Fallback vh/-webkit-fill-available
-     tetap ada untuk browser yang JS-nya belum sempat jalan. */
-  height: 100vh;
-  height: -webkit-fill-available;
-  height: calc(var(--vh, 1vh) * 100);
+  height: 100%;
+  min-height: 100%;
   overflow: hidden;
+  overscroll-behavior: none;
   font-family: 'Poppins', sans-serif;
   background-color: #000000;
+  color: var(--text-main);
+  -webkit-text-size-adjust: 100%;
+  touch-action: manipulation;
 }
 
-/* Global scaling 75% untuk semua tampilan */
 body {
-  zoom: 1.0;
-}
-
-@supports not (zoom: 1) {
-  body {
-    transform: scale(0.8);
-    transform-origin: top left;
-    width: 133.333vw;
-    height: 133.333vh;
-  }
+  position: relative;
 }
 
 /* ═══════════════════════════════════════════════
@@ -83,6 +71,11 @@ body {
   inset: 0;
   width: 100%;
   height: 100%;
+  min-height: 0;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  overflow: hidden;
 }
 
 @media screen and (orientation: portrait) and (max-width: 1024px) and (hover: none) {
@@ -120,16 +113,8 @@ button {
   justify-content: center;
   width: 100%;
   height: 100%;
-  height: -webkit-fill-available;
-  height: calc(var(--vh, 1vh) * 100);
-  /* BUGFIX: centering with align-items/justify-content clips content
-     that's taller than the viewport (short landscape phones), with no
-     way to scroll to the clipped part. overflow-y:auto here plus
-     margin:auto on the inner wrapper (.screen-content-safe) lets
-     content center when it fits and fall back to normal scrollable
-     flow when it doesn't. */
-  overflow-y: auto;
-  /* RESPONSIVE FIX: Memastikan jarak aman otomatis pada device layar berponi (Notch) */
+  min-height: 0;
+  overflow: hidden;
   padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
 }
 
@@ -138,6 +123,11 @@ button {
    centering instead of relying only on the parent flex centering. */
 .screen-content-safe {
   margin: auto;
+  width: min(100%, 100%);
+  max-width: 100%;
+  max-height: calc(100% - 1.5rem);
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .screen.active {
@@ -793,6 +783,8 @@ button {
   justify-content: stretch;
   flex-direction: column;
   padding: 0;
+  overflow: hidden;
+  position: relative;
 }
 
 #screen-game.active {
@@ -805,6 +797,9 @@ button {
   width: 100%;
   height: 100%;
   display: block;
+  max-width: 100%;
+  max-height: 100%;
+  touch-action: none;
 }
 
 /* ── HUD Overlays ── */
@@ -1256,7 +1251,8 @@ button {
 
 @media (max-width: 500px) {
   .glass-card {
-    padding: 28px 22px;
+    padding: 24px 18px;
+    gap: 12px;
   }
 
   #menu-mascot {
@@ -1286,6 +1282,33 @@ button {
 
   #btn-pause {
     font-size: 1.2rem;
+  }
+}
+
+@media (max-height: 720px) and (orientation: landscape), (max-height: 820px) and (max-width: 900px) {
+  .glass-card,
+  .story-card,
+  .menu-content,
+  .shop-content,
+  .gameover-content {
+    padding: 18px 20px;
+    gap: 10px;
+  }
+
+  .menu-content,
+  .shop-content,
+  .gameover-content {
+    max-height: calc(100% - 1rem);
+  }
+
+  .menu-controls-hint {
+    padding: 10px 16px;
+  }
+
+  .ctrl-btn {
+    width: 72px;
+    height: 72px;
+    font-size: 0.72rem;
   }
 }
 
