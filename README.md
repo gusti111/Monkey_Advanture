@@ -38,6 +38,26 @@ The project uses an original browser game engine organized into dedicated module
 
 Exact bindings may vary as the game evolves; follow the in-game control guide.
 
+## Gameplay and progression flow
+
+```mermaid
+flowchart TD
+    A["Launch Bekantan Mangrove Adventure"] --> B["Enter player name"]
+    B --> C["Read story introduction"]
+    C --> D["Open main menu"]
+    D --> E{"Choose an action"}
+    E -->|Play| F["Start a run"]
+    E -->|Shop| G["Browse available items"]
+    G --> D
+    F --> H["Navigate obstacles and collect items"]
+    H --> I["Use jumps, ducking, and available abilities"]
+    I --> J{"Player hit or run ended?"}
+    J -->|No| H
+    J -->|Yes| K["Update score and local progress"]
+    K --> L["Return to menu or play again"]
+    L --> D
+```
+
 ## Technology
 
 - HTML5 and CSS3
